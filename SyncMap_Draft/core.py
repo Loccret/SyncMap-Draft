@@ -5,7 +5,7 @@ __all__ = ['SyncMap']
 
 # %% ../nbs/00_core.ipynb 2
 import pandas as pd
-# import np_utils
+
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -17,6 +17,10 @@ from scipy.stats import entropy
 from sklearn.metrics import normalized_mutual_info_score
 
 from tqdm import tqdm
+
+import sys
+sys.path.insert(0, '../')
+from .utility import OverlapChunkTest1, to_categorical
 
 # %% ../nbs/00_core.ipynb 3
 class SyncMap:
