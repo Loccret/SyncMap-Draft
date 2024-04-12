@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "SyncMap-Draft"
+  site-url: "https://Loccret.github.io/SyncMap-Draft"
+  description: ""
+  repo-branch: main
+  repo-url: "https://github.com/Loccret/SyncMap-Draft"
