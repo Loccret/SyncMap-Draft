@@ -10,11 +10,6 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-# from keras.utils import np_utils
-import numpy as np
-import math
-import matplotlib.pyplot as plt
-# from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import DBSCAN
 from scipy.spatial import distance
 
