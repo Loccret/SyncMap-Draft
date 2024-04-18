@@ -28,40 +28,47 @@ jobs:
         channel-priority: true
         activate-environment: pytorch-main
         environment-file: environment.yml
-    - run: conda env create -n pytorch-main --file environment.yml
+    # - run: conda env create -n pytorch-main --file environment.yml
 
-    # Confirm the environment is activated
     - name: Create and activate environment
       run: |
         conda env create -n pytorch-main --file environment.yml
         conda activate pytorch-main
+        # Any subsequent commands would go here and be executed within the activated environment
       shell: bash
-
-# Set up Python with conda (Miniconda)
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    # Set up Python with conda (Miniconda)
-    - name: Set up Conda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        python-version: '3.11'
-        miniconda-version: 'latest'
-        use-mamba: true
-        mamba-version: 'latest'
-        channels: conda-forge,defaults
-        channel-priority: true
-        environment-file: environment.yml
-        activate-environment: pytorch-main
-    
     # Confirm the environment is activated
     - name: Check active environment
       run: echo "Activated environment $(conda info --active-env)"
 
-    # Continue with your workflow steps
     - uses: fastai/workflows/quarto-ghp@master
+
+
+
+# # Set up Python with conda (Miniconda)
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: actions/checkout@v4
+    
+#     # Set up Python with conda (Miniconda)
+#     - name: Set up Conda
+#       uses: conda-incubator/setup-miniconda@v2
+#       with:
+#         python-version: '3.11'
+#         miniconda-version: 'latest'
+#         use-mamba: true
+#         mamba-version: 'latest'
+#         channels: conda-forge,defaults
+#         channel-priority: true
+#         environment-file: environment.yml
+#         activate-environment: pytorch-main
+    
+#     # Confirm the environment is activated
+#     - name: Check active environment
+#       run: echo "Activated environment $(conda info --active-env)"
+
+#     # Continue with your workflow steps
+#     - uses: fastai/workflows/quarto-ghp@master
 
