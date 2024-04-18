@@ -9,25 +9,29 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps: [uses: fastai/workflows/quarto-ghp@master]
-
 # jobs:
 #   deploy:
 #     runs-on: ubuntu-latest
+#     steps: [uses: fastai/workflows/quarto-ghp@master]
 
-#     steps:
-#     - uses: actions/checkout@v2
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-#     - name: Set up Python 3.11
-#       uses: actions/setup-python@v2
-#       with:
-#         python-version: 3.11
-#     # - name: Install dependencies
-#     #   run: |
-#     #     python -m pip install --upgrade pip
-#     #     pip install -r requirements.txt  # Make sure to have this file or specify your project's dependencies here.
+    steps:
+    - uses: actions/checkout@v2
 
-#     - uses: fastai/workflows/quarto-ghp@master
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    - name: Install dependencies
+      run: |
+        pip install scikit-learn
+
+    - uses: fastai/workflows/quarto-ghp@master
+
+# - name: Install dependencies
+#   run: |
+#     python -m pip install --upgrade pip
+#     pip install -r requirements.txt  # Make sure to have this file or specify your project's dependencies here.
