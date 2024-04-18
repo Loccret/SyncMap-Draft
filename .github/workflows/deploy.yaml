@@ -32,21 +32,30 @@ on:
 #     - uses: fastai/workflows/quarto-ghp@master
 
 # Set up Python with conda (Miniconda)
-- name: Set up Conda
-  uses: conda-incubator/setup-miniconda@v2
-  with:
-    python-version: '3.11'
-    miniconda-version: 'latest'
-    use-mamba: true
-    mamba-version: 'latest'
-    channels: conda-forge,defaults
-    channel-priority: true
-    environment-file: environment.yml
-    activate-environment: pytorch-main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-# Confirm the environment is activated
-- name: Check active environment
-  run: echo "Activated environment $(conda info --active-env)"
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Set up Python with conda (Miniconda)
+    - name: Set up Conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        python-version: '3.11'
+        miniconda-version: 'latest'
+        use-mamba: true
+        mamba-version: 'latest'
+        channels: conda-forge,defaults
+        channel-priority: true
+        environment-file: environment.yml
+        activate-environment: pytorch-main
+    
+    # Confirm the environment is activated
+    - name: Check active environment
+      run: echo "Activated environment $(conda info --active-env)"
 
-# Continue with your workflow steps
-- uses: fastai/workflows/quarto-ghp@maste
+    # Continue with your workflow steps
+    - uses: fastai/workflows/quarto-ghp@master
+
