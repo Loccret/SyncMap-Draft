@@ -14,22 +14,28 @@ on:
 #     runs-on: ubuntu-latest
 #     steps: [uses: fastai/workflows/quarto-ghp@master]
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - uses: actions/checkout@v4
-#     - uses: actions/setup-python@v5
-#       with:
-#         python-version: '3.11' 
-#         mamba-version: "*"
-#         channels: conda-forge,defaults
-#         channel-priority: true
-#         activate-environment: pytorch-main
-#         environment-file: environment.yml
-#     - run: conda env create -n pytorch-main --file environment.yml
-#     - uses: fastai/workflows/quarto-ghp@master
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
+        mamba-version: "*"
+        channels: conda-forge,defaults
+        channel-priority: true
+        activate-environment: pytorch-main
+        environment-file: environment.yml
+    - run: conda env create -n pytorch-main --file environment.yml
+
+    # Confirm the environment is activated
+    - name: Create and activate environment
+      run: |
+        conda env create -n pytorch-main --file environment.yml
+        conda activate pytorch-main
+      shell: bash
 
 # Set up Python with conda (Miniconda)
 jobs:
