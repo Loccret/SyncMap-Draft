@@ -14,24 +14,39 @@ on:
 #     runs-on: ubuntu-latest
 #     steps: [uses: fastai/workflows/quarto-ghp@master]
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.11' 
-        mamba-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
-        activate-environment: pytorch-main
-        environment-file: environment.yml
-    - run: conda env create -n pytorch-main --file environment.yml
-    - uses: fastai/workflows/quarto-ghp@master
+#     steps:
+#     - uses: actions/checkout@v4
+#     - uses: actions/setup-python@v5
+#       with:
+#         python-version: '3.11' 
+#         mamba-version: "*"
+#         channels: conda-forge,defaults
+#         channel-priority: true
+#         activate-environment: pytorch-main
+#         environment-file: environment.yml
+#     - run: conda env create -n pytorch-main --file environment.yml
+#     - uses: fastai/workflows/quarto-ghp@master
 
-# - name: Install dependencies
-#   run: |
-#     python -m pip install --upgrade pip
-#     pip install -r requirements.txt  # Make sure to have this file or specify your project's dependencies here.
+# Set up Python with conda (Miniconda)
+- name: Set up Conda
+  uses: conda-incubator/setup-miniconda@v2
+  with:
+    python-version: '3.11'
+    miniconda-version: 'latest'
+    use-mamba: true
+    mamba-version: 'latest'
+    channels: conda-forge,defaults
+    channel-priority: true
+    environment-file: environment.yml
+    activate-environment: pytorch-main
+
+# Confirm the environment is activated
+- name: Check active environment
+  run: echo "Activated environment $(conda info --active-env)"
+
+# Continue with your workflow steps
+- uses: fastai/workflows/quarto-ghp@maste
