@@ -15,7 +15,7 @@ from sklearn.cluster import DBSCAN
 from scipy.spatial import distance
 
 from scipy.stats import entropy
-from sklearn.metrics import normalized_mutual_info_score
+# from sklearn.metrics import normalized_mutual_info_score
 
 from tqdm import tqdm
 
