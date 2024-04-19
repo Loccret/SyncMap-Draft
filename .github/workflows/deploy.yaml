@@ -108,13 +108,13 @@ jobs:
       #       print(f'::error title="Could not enable GitHub Pages Automatically":: {msg}\n{e}')
       #       sys.exit(1)
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ github.token }}
-          force_orphan: true
-          publish_dir: ./_docs
-          # The following lines assign commit authorship to the official GH-Actions bot for deploys to `gh-pages` branch.
-          # You can swap them out with your own user credentials.
-          user_name: loccret
-          user_email: loccret@gmail.com
+      # - name: Deploy to GitHub Pages
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ github.token }}
+      #     force_orphan: true
+      #     publish_dir: ./_docs
+      #     # The following lines assign commit authorship to the official GH-Actions bot for deploys to `gh-pages` branch.
+      #     # You can swap them out with your own user credentials.
+      #     user_name: loccret
+      #     user_email: loccret@gmail.com
