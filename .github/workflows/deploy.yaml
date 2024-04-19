@@ -14,61 +14,67 @@ on:
 #     runs-on: ubuntu-latest
 #     steps: [uses: fastai/workflows/quarto-ghp@master]
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.11' 
-        mamba-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
-        activate-environment: pytorch-main
-        environment-file: environment.yml
-    # - run: conda env create -n pytorch-main --file environment.yml
-
-    - name: Create and activate environment
-      run: |
-        conda env create -n pytorch-main --file environment.yml
-        conda activate pytorch-main
-        # Any subsequent commands would go here and be executed within the activated environment
-      shell: bash
-    # Confirm the environment is activated
-    - name: Check active environment
-      run: echo "Activated environment $(conda info --active-env)"
-
-    - uses: fastai/workflows/quarto-ghp@master
-
-
-
-# # Set up Python with conda (Miniconda)
 # jobs:
 #   deploy:
 #     runs-on: ubuntu-latest
 
 #     steps:
 #     - uses: actions/checkout@v4
-    
-#     # Set up Python with conda (Miniconda)
-#     - name: Set up Conda
-#       uses: conda-incubator/setup-miniconda@v2
+#     - uses: actions/setup-python@v5
 #       with:
-#         python-version: '3.11'
-#         miniconda-version: 'latest'
-#         use-mamba: true
-#         mamba-version: 'latest'
+#         python-version: '3.11' 
+#         mamba-version: "*"
 #         channels: conda-forge,defaults
 #         channel-priority: true
-#         environment-file: environment.yml
 #         activate-environment: pytorch-main
-    
+#         environment-file: environment.yml
+#     # - run: conda env create -n pytorch-main --file environment.yml
+
+#     - name: Create and activate environment
+#       run: |
+#         conda env create -n pytorch-main --file environment.yml
+#         conda activate pytorch-main
+#         # Any subsequent commands would go here and be executed within the activated environment
+#       shell: bash
 #     # Confirm the environment is activated
 #     - name: Check active environment
 #       run: echo "Activated environment $(conda info --active-env)"
 
-#     # Continue with your workflow steps
 #     - uses: fastai/workflows/quarto-ghp@master
+
+jobs:
+  create-env:
+    name: ${{ matrix.os }} 
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+        
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+        
+      - name: create environment with mamba
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          channels: conda-forge, defaults
+          auto-activate-base: false
+          activate-environment: pytorch-main
+          environment-file: environment.yaml
+      
+      - name: check solution
+        run: |
+          mamba env export
+      
+      - name: Check active environment
+        run: echo "Activated environment $(conda info --active-env)"
+
+      - uses: fastai/workflows/quarto-ghp@master 
+
 
