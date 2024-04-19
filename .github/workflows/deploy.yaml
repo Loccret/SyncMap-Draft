@@ -9,10 +9,10 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-#     steps: [uses: fastai/workflows/quarto-ghp@master]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps: [uses: fastai/workflows/quarto-ghp@master]
 
 # jobs:
 #   deploy:
@@ -42,45 +42,46 @@ on:
 
 #     - uses: fastai/workflows/quarto-ghp@master
 
-jobs:
-  create-env:
-    name: ${{ matrix.os }} 
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
+# jobs:
+#   create-env:
+#     name: ${{ matrix.os }} 
+#     runs-on: ${{ matrix.os }}
+#     defaults:
+#       run:
+#         shell: bash -l {0}
         
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         os: [ubuntu-latest]
         
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v2
+#     steps:
+#       - name: checkout repository
+#         uses: actions/checkout@v2
         
-      - name: create environment with mamba
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          channels: conda-forge, defaults
-          auto-activate-base: false
-          activate-environment: pytorch-main
-          environment-file: environment.yml
+#       - name: create environment with mamba
+#         uses: conda-incubator/setup-miniconda@v2
+#         with:
+#           mamba-version: "*"
+#           channels: conda-forge, defaults
+#           auto-activate-base: false
+#           activate-environment: pytorch-main
+#           environment-file: environment.yml
       
-      - name: check solution
-        run: |
-          mamba env export
+#       - name: check solution
+#         run: |
+#           mamba env export
       
-      - name: Install tools and create docs
-        run: |
-          wget -nv https://www.quarto.org/download/latest/quarto-linux-amd64.deb
-          sudo dpkg -i quarto*.deb
-          echo "installed quarto"
-          pip install -Uq git+https://github.com/fastai/fastcore.git
-          pip install -Uq git+https://github.com/fastai/execnb.git
-          pip install -Uq git+https://github.com/fastai/nbdev.git
-          nbdev_docs
+#       - name: Install tools and create docs
+#         run: |
+#           wget -nv https://www.quarto.org/download/latest/quarto-linux-amd64.deb
+#           sudo dpkg -i quarto*.deb
+#           echo "installed quarto"
+#           pip install -Uq git+https://github.com/fastai/fastcore.git
+#           pip install -Uq git+https://github.com/fastai/execnb.git
+#           pip install -Uq git+https://github.com/fastai/nbdev.git
+#           nbdev_docs
+
 #############################################################
       # # - uses: fastai/workflows/quarto-ghp@master 
       # - name: Use FastAI Quarto-GHP

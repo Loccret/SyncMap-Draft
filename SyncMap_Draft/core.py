@@ -20,13 +20,14 @@ from scipy.stats import entropy
 from tqdm import tqdm
 
 import sys
-sys.path.insert(0, '../')
+# sys.path.insert(0, '../')
+# 如果没有 pip install -e . 下面一行就不会成功
 from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist
 
 from ipywidgets import widgets
 from IPython.display import display
 
-# %% ../nbs/00_core.ipynb 3
+# %% ../nbs/00_core.ipynb 4
 class SyncMap:
 	
 	def __init__(self, input_size, dimensions, adaptation_rate):
@@ -168,7 +169,7 @@ class SyncMap:
 		plt.show()
 		plt.close()
 
-# %% ../nbs/00_core.ipynb 5
+# %% ../nbs/00_core.ipynb 6
 # extract data from parameter space
 def generate_activity_probs(self, sample_x = 0, sample_y = 0, err = 1e-4):
     
