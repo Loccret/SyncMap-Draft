@@ -24,8 +24,8 @@ import sys
 # 如果没有 pip install -e . 下面一行就不会成功
 from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist
 
-from ipywidgets import widgets
-from IPython.display import display
+# from ipywidgets import widgets
+# from IPython.display import display
 
 # %% ../nbs/00_core.ipynb 4
 class SyncMap:
