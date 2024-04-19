@@ -9,10 +9,10 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps: [uses: fastai/workflows/quarto-ghp@master]
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps: [uses: fastai/workflows/quarto-ghp@master]
 
 # jobs:
 #   deploy:
@@ -42,40 +42,78 @@ jobs:
 
 #     - uses: fastai/workflows/quarto-ghp@master
 
-# jobs:
-#   create-env:
-#     name: ${{ matrix.os }} 
-#     runs-on: ${{ matrix.os }}
-#     defaults:
-#       run:
-#         shell: bash -l {0}
+jobs:
+  create-env:
+    name: ${{ matrix.os }} 
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
         
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         os: [ubuntu-latest]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
         
-#     steps:
-#       - name: checkout repository
-#         uses: actions/checkout@v2
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
         
-#       - name: create environment with mamba
-#         uses: conda-incubator/setup-miniconda@v2
-#         with:
-#           mamba-version: "*"
-#           channels: conda-forge, defaults
-#           auto-activate-base: false
-#           activate-environment: pytorch-main
-#           environment-file: environment.yml
+      - name: create environment with mamba
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          channels: conda-forge, defaults
+          auto-activate-base: false
+          activate-environment: pytorch-main
+          environment-file: environment.yml
       
-#       - name: check solution
-#         run: |
-#           mamba env export
+      - name: check solution
+        run: |
+          mamba env export
       
+      - name: Install tools and create docs
+        run: |
+          wget -nv https://www.quarto.org/download/latest/quarto-linux-amd64.deb
+          sudo dpkg -i quarto*.deb
+          echo "installed quarto"
+          pip install -Uq git+https://github.com/fastai/fastcore.git
+          pip install -Uq git+https://github.com/fastai/execnb.git
+          pip install -Uq git+https://github.com/fastai/nbdev.git
+          nbdev_docs
+#############################################################
+      # # - uses: fastai/workflows/quarto-ghp@master 
+      # - name: Use FastAI Quarto-GHP
+      #   uses: fastai/workflows/quarto-ghp@master
+      #   env:
+      #     CONDA_DEFAULT_ENV: pytorch-main
+#############################################################
+      # - name: Install ghapi
+      #   # this needs to be in the default shell so that below's default Python shell can activate GH pages
+      #   shell: bash
+      #   run: |
+      #     pip install -Uq git+https://github.com/fastai/ghapi.git # you need this for enabling pages
+      #     pip install -Uq git+https://github.com/fastai/nbdev.git
 
-#       # - uses: fastai/workflows/quarto-ghp@master 
-#       - name: Use FastAI Quarto-GHP
-#         uses: fastai/workflows/quarto-ghp@master
-#         env:
-#           CONDA_DEFAULT_ENV: pytorch-main
+      # - name: Enable GitHub Pages
+      #   shell: python
+      #   run: |
+      #     import ghapi.core,nbdev.config,sys
+      #     msg="Please enable GitHub Pages to publish from the root of the `gh-pages` branch per these instructions - https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-from-a-branch"
+      #     try:
+      #       api = ghapi.core.GhApi(owner=nbdev.config.get_config().user, repo=nbdev.config.get_config().repo, token="${{github.token}}")
+      #       api.enable_pages(branch='gh-pages')
+      #     except Exception as e: 
+      #       print(f'::error title="Could not enable GitHub Pages Automatically":: {msg}\n{e}')
+      #       sys.exit(1)
 
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ github.token }}
+          force_orphan: true
+          publish_dir: ./_docs
+          # The following lines assign commit authorship to the official GH-Actions bot for deploys to `gh-pages` branch.
+          # You can swap them out with your own user credentials.
+          user_name: loccret
+          user_email: loccret@gmail.com
