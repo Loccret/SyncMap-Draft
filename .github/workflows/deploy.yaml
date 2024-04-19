@@ -72,9 +72,10 @@ jobs:
         run: |
           mamba env export
       
-      - name: Check active environment
-        run: echo "Activated environment $(conda info --active-env)"
 
-      - uses: fastai/workflows/quarto-ghp@master 
-
+      # - uses: fastai/workflows/quarto-ghp@master 
+      - name: Use FastAI Quarto-GHP
+        uses: fastai/workflows/quarto-ghp@master
+        env:
+          CONDA_DEFAULT_ENV: pytorch-main
 
