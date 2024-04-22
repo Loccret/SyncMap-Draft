@@ -29,7 +29,9 @@ from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist
 
 # %% ../nbs/00_core.ipynb 4
 class SyncMap:
-	
+	'''
+	The original syncmap
+	'''
 	def __init__(self, input_size, dimensions, adaptation_rate):
 		
 		self.organized= False
@@ -172,13 +174,15 @@ class SyncMap:
 # %% ../nbs/00_core.ipynb 6
 # extract data from parameter space
 def generate_activity_probs(self, sample_x = 0, sample_y = 0, err = 1e-4):
-    
+    '''
+    Generate the activity probabilities of each variable in syncmap
+    '''
     sample_cord = np.array([sample_x, sample_y])
     # probs = np.zeros(self.output_size)
     weight_dist = compute_combi_dist(self.syncmap)
     pos = np.where(weight_dist == weight_dist.max())[0]
     # tau = -weight_dist[*pos] / np.log(err)  # set tau to make the smallest prob to be err
-    tau = -weight_dist[*pos] / np.log(err)
+    tau = -weight_dist.__getitem__(tuple(pos)) / np.log(err)
     # probs = np.exp(-weight_dist / tau)  
     sample_dist = ((self.syncmap - sample_cord) ** 2 ).sum(axis = -1)
     sample_probs = np.exp(-sample_dist / tau)
