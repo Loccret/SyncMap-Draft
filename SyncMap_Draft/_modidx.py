@@ -56,5 +56,7 @@ d = { 'settings': { 'branch': 'main',
                                                                                                     'SyncMap_Draft/utility.py'),
                                        'SyncMap_Draft.utility.compute_combi_dist': ( 'utility.html#compute_combi_dist',
                                                                                      'SyncMap_Draft/utility.py'),
+                                       'SyncMap_Draft.utility.plot_encoded_data': ( 'utility.html#plot_encoded_data',
+                                                                                    'SyncMap_Draft/utility.py'),
                                        'SyncMap_Draft.utility.to_categorical': ( 'utility.html#to_categorical',
                                                                                  'SyncMap_Draft/utility.py')}}}
