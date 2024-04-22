@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+
 # %% ../nbs/99_utility.ipynb 3
 def to_categorical(x, num_classes=None):
     """Converts a class vector (integers) to binary class matrix.
@@ -185,7 +186,7 @@ class OverlapChunkTest1:
 		plt.show()
 		plt.close()
 
-# %% ../nbs/99_utility.ipynb 8
+# %% ../nbs/99_utility.ipynb 11
 def compute_combi_dist(data:np.ndarray)->np.ndarray:
     '''
     Compute the distance between all rows of the matrix.
