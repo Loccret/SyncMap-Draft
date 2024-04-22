@@ -3,13 +3,14 @@
 # %% auto 0
 __all__ = []
 
-# %% ../nbs/plotly_hello_world.ipynb 1
+# %% ../nbs/plotly_hello_world.ipynb 2
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.subplots import make_subplots
 
-import ipywidgets as widgets
-from IPython.display import HTML, display
+# import ipywidgets as widgets
+# from IPython.display import HTML, display
 

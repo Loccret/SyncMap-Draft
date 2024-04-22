@@ -7,7 +7,8 @@ __all__ = ['to_categorical', 'OverlapChunkTest1', 'compute_combi_dist']
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-
+import warnings
+import fastcore as fc
 
 # %% ../nbs/99_utility.ipynb 3
 def to_categorical(x, num_classes=None):
@@ -131,7 +132,6 @@ class OverlapChunkTest1:
 		return input_value
 
 	def getSequence(self, iterations):
-	
 		input_class = np.empty(iterations)
 		input_sequence = np.empty((iterations, self.output_size))
 
@@ -164,7 +164,7 @@ class OverlapChunkTest1:
 		plt.close()
 	
 	def plotSuperposed(self, input_class, input_sequence = None, save = False):
-	
+		warnings.warn("please use `plot_encoded_data` instead", category=DeprecationWarning)
 		input_sequence= np.asarray(input_sequence)
 		
 		t = [i for i,value in enumerate(input_sequence)]
@@ -186,6 +186,8 @@ class OverlapChunkTest1:
 		plt.show()
 		plt.close()
 
+		
+
 # %% ../nbs/99_utility.ipynb 11
 def compute_combi_dist(data:np.ndarray)->np.ndarray:
     '''
@@ -201,3 +203,12 @@ def compute_combi_dist(data:np.ndarray)->np.ndarray:
         for j in range(n_samples):
             dist[i, j] = np.linalg.norm(data[i] - data[j])
     return dist
+
+# %% ../nbs/99_utility.ipynb 14
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.io as pio
+
+# @fc.patch
+
