@@ -24,6 +24,7 @@ import sys
 # 如果没有 pip install -e . 下面一行就不会成功
 from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist
 
+import fastcore.all as fc
 # from ipywidgets import widgets
 # from IPython.display import display
 
@@ -173,7 +174,9 @@ class SyncMap:
 
 # %% ../nbs/00_core.ipynb 6
 # extract data from parameter space
-def generate_activity_probs(self, sample_x = 0, sample_y = 0, err = 1e-4):
+
+@fc.patch
+def generate_activity_probs(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
     '''
     Generate the activity probabilities of each variable in syncmap
     '''
@@ -188,10 +191,10 @@ def generate_activity_probs(self, sample_x = 0, sample_y = 0, err = 1e-4):
     sample_probs = np.exp(-sample_dist / tau)
     return sample_probs
 
-
-def plot_activity_maps(self, x = 0, y = 0):
+@fc.patch
+def plot_activity_maps(self:SyncMap, x = 0, y = 0):
     fig, axs = plt.subplots(1, 2, figsize = (10, 5))
-    sample_probs = generate_activity_probs(self, x, y)
+    sample_probs = self.generate_activity_probs(x, y)
     axs[0].scatter(self.syncmap[:, 0], self.syncmap[:, 1], color = 'blue')
     axs[0].scatter(x, y, color = 'red')
     axs[0].set_xlim(self.syncmap.min()-0.5, self.syncmap.max()+0.5)
@@ -200,5 +203,5 @@ def plot_activity_maps(self, x = 0, y = 0):
     print(sample_probs)
     plt.show()
 
-SyncMap.generate_activity_probs = generate_activity_probs
-SyncMap.plot_activity_maps = plot_activity_maps
+# SyncMap.generate_activity_probs = generate_activity_probs
+# SyncMap.plot_activity_maps = plot_activity_maps
