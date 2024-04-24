@@ -25,6 +25,9 @@ import sys
 from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist
 
 from fastcore.utils import *
+
+# from plotly.subplots import make_subplots
+# import plotly.graph_objs as go
 # import fastcore.all as fc  # patch会报错
 # from ipywidgets import widgets
 # from IPython.display import display
@@ -180,6 +183,7 @@ class SyncMap:
 def generate_activity_probs(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
     '''
     Generate the activity probabilities of each variable in syncmap
+    return: np.array, shape = (self.output_size, )
     '''
     sample_cord = np.array([sample_x, sample_y])
     # probs = np.zeros(self.output_size)
@@ -207,7 +211,7 @@ def plot_activity_maps(self:SyncMap, x = 0, y = 0):
 # SyncMap.generate_activity_probs = generate_activity_probs
 # SyncMap.plot_activity_maps = plot_activity_maps
 
-# %% ../nbs/00_core.ipynb 21
+# %% ../nbs/00_core.ipynb 20
 @patch
 def extract_act_var(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
     '''
