@@ -253,7 +253,23 @@ def plot_raw_data(self:OverlapChunkTest1,
         xaxis_title="",  # Clear any axis title
         xaxis_tickfont=dict(size=10),  # Adjust xaxis font size 
         margin=dict(l=20, r=20, t=20, b=20),  # Reduce margins 
-        showlegend=False
+        showlegend=False,
+        updatemenus=[
+            dict(
+                type="buttons",
+                direction="right",
+                x=0.01,
+                xanchor="left",
+                y=1.12,
+                yanchor="top",
+                font=dict(size=10),
+                buttons=[dict(
+                    label="Set Range to 3000",
+                    method="relayout",
+                    args=["xaxis.range", [0, 3000]],  # Sets the range from 0 to 100
+                )]
+            )
+        ]
     )
 
     fig['layout'][f'xaxis{num_channels}'].update(
