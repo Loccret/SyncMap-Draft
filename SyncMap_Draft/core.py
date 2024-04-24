@@ -206,3 +206,14 @@ def plot_activity_maps(self:SyncMap, x = 0, y = 0):
 
 # SyncMap.generate_activity_probs = generate_activity_probs
 # SyncMap.plot_activity_maps = plot_activity_maps
+
+# %% ../nbs/00_core.ipynb 18
+@patch
+def extract_data(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
+    '''
+    Extract data from the parameter space
+    '''
+    probs = self.generate_activity_probs(sample_x, sample_y, err)
+    sampled_data = np.random.binomial(1, probs)
+    return sampled_data
+    
