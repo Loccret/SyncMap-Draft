@@ -207,13 +207,44 @@ def plot_activity_maps(self:SyncMap, x = 0, y = 0):
 # SyncMap.generate_activity_probs = generate_activity_probs
 # SyncMap.plot_activity_maps = plot_activity_maps
 
-# %% ../nbs/00_core.ipynb 18
+# %% ../nbs/00_core.ipynb 21
 @patch
-def extract_data(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
+def extract_act_var(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
     '''
-    Extract data from the parameter space
+    check if there is any activated variables
     '''
-    probs = self.generate_activity_probs(sample_x, sample_y, err)
-    sampled_data = np.random.binomial(1, probs)
-    return sampled_data
-    
+    probs = self.generate_activity_probs(sample_x, sample_y, err)  # Dim: d
+    sampled_vars = np.random.binomial(1, probs)  # Dim: d
+    # due to there is only 1 variables should be activated, we randomly choose one
+    sampled_vars_idx = np.where(sampled_vars)[0]
+    if len(sampled_vars_idx) == 0:
+        return None 
+    else:
+        sampled_var = np.random.choice(sampled_vars_idx)
+        return sampled_var
+
+
+@patch
+def create_element(self:SyncMap, sampled_var, env):
+    '''
+    create an element of the time series of the sampled variable
+    '''
+    tiny_series = np.zeros(env.output_size)
+    if sampled_var is None:
+        return tiny_series
+    else:
+        tiny_series[sampled_var] = 1
+        return tiny_series
+
+
+@patch
+def create_series(self:SyncMap, x, y, env, seq_len = 1000):
+    '''
+    generate time series data
+    '''
+    time_series = []
+    for _ in range(seq_len):
+        sampled_var = self.extract_act_var(sample_x = x, sample_y = y)
+        tiny_series = self.create_element(sampled_var, env)
+        time_series.append(tiny_series)
+    return np.array(time_series)

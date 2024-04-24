@@ -217,7 +217,7 @@ import plotly.io as pio
 @patch
 def plot_raw_data(self:OverlapChunkTest1, 
                     values:np.ndarray,  # time series data
-                    labels:np.ndarray,  # the labels
+                    labels:np.ndarray = None,  # the labels
                     save = False):
     '''
     Plot the encoded data.
@@ -241,11 +241,12 @@ def plot_raw_data(self:OverlapChunkTest1,
             go.Scatter(y=values[:, i], mode='lines', name=f'Channel {i+1}'),
             row=i + 1, col=1
         );
-        fig.add_trace(
-            go.Scatter(y=labels, mode='lines', 
-                    name=f'Channel {i+1}', line=dict(color='black', dash='dot', width=1)),
-            row=i + 1, col=1
-        );
+        if labels is not None:
+            fig.add_trace(
+                go.Scatter(y=labels, mode='lines', 
+                        name=f'Channel {i+1}', line=dict(color='black', dash='dot', width=1)),
+                row=i + 1, col=1
+            );
 
     # Update layout with a range slider and appropriate axes configurations
     fig.update_layout(
