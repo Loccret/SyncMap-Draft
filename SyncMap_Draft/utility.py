@@ -168,7 +168,7 @@ class OverlapChunkTest1:
 		plt.close()
 	
 	def plotSuperposed(self, input_class, input_sequence = None, save = False):
-		warnings.warn("please use `plot_encoded_data` instead", category=DeprecationWarning)
+		warnings.warn("please use `plot_raw_data` instead", category=DeprecationWarning)
 		input_sequence= np.asarray(input_sequence)
 		
 		t = [i for i,value in enumerate(input_sequence)]
@@ -215,7 +215,7 @@ from plotly.subplots import make_subplots
 import plotly.io as pio
 
 @patch
-def plot_encoded_data(self:OverlapChunkTest1, 
+def plot_raw_data(self:OverlapChunkTest1, 
                     values:np.ndarray,  # time series data
                     labels:np.ndarray,  # the labels
                     save = False):
