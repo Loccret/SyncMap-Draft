@@ -233,19 +233,19 @@ def plot_raw_data(self:OverlapChunkTest1,
     fig = make_subplots(rows=num_channels, cols=1, shared_xaxes=True, 
                         shared_yaxes=True,
                         vertical_spacing=0.02
-                        )
+                        );
 
     # Loop through each channel and add it as a separate subplot
     for i in range(num_channels):
         fig.add_trace(
             go.Scatter(y=values[:, i], mode='lines', name=f'Channel {i+1}'),
             row=i + 1, col=1
-        )
+        );
         fig.add_trace(
             go.Scatter(y=labels, mode='lines', 
                     name=f'Channel {i+1}', line=dict(color='black', dash='dot', width=1)),
             row=i + 1, col=1
-        )
+        );
 
     # Update layout with a range slider and appropriate axes configurations
     fig.update_layout(
@@ -270,14 +270,14 @@ def plot_raw_data(self:OverlapChunkTest1,
                 )]
             )
         ]
-    )
+    );
 
     fig['layout'][f'xaxis{num_channels}'].update(
         rangeslider=dict(visible=True, thickness=0.02),  # Show last range slider
-    )
+    );
 
     for j in range(1, num_channels + 1):
-        fig.update_layout(**{f'yaxis{j}': dict(showticklabels=False)})
+        fig.update_layout(**{f'yaxis{j}': dict(showticklabels=False)});
         
     if save:
         fig.write_html("plot.html")
