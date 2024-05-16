@@ -11,7 +11,9 @@ import warnings
 # import fastcore.all as fc
 from fastcore.utils import *  # for patch
 
-# %% ../nbs/99_utility.ipynb 6
+from IPython.display import HTML
+
+# %% ../nbs/99_utility.ipynb 7
 def to_categorical(x, num_classes=None):
     """Converts a class vector (integers) to binary class matrix.
 
@@ -53,7 +55,7 @@ def to_categorical(x, num_classes=None):
     categorical = np.reshape(categorical, output_shape)
     return categorical
 
-# %% ../nbs/99_utility.ipynb 8
+# %% ../nbs/99_utility.ipynb 9
 class OverlapChunkTest1:
 	'''
 	create a simple time series to examine SyncMap
@@ -192,7 +194,7 @@ class OverlapChunkTest1:
 
 		
 
-# %% ../nbs/99_utility.ipynb 14
+# %% ../nbs/99_utility.ipynb 15
 def compute_combi_dist(data:np.ndarray)->np.ndarray:
     '''
     Compute the distance between all rows of the matrix.
@@ -208,7 +210,7 @@ def compute_combi_dist(data:np.ndarray)->np.ndarray:
             dist[i, j] = np.linalg.norm(data[i] - data[j])
     return dist
 
-# %% ../nbs/99_utility.ipynb 18
+# %% ../nbs/99_utility.ipynb 19
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -282,4 +284,5 @@ def plot_raw_data(self:OverlapChunkTest1,
         
     if save:
         fig.write_html("plot.html")
-    fig.show()
+    # fig.show()
+    return fig

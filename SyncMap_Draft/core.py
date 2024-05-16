@@ -32,7 +32,7 @@ from fastcore.utils import *
 # from ipywidgets import widgets
 # from IPython.display import display
 
-# %% ../nbs/00_core.ipynb 3
+# %% ../nbs/00_core.ipynb 4
 class SyncMap:
 	'''
 	The original syncmap
@@ -44,6 +44,7 @@ class SyncMap:
 		self.dimensions= dimensions
 		self.input_size= input_size
 		#syncmap= np.zeros((input_size,dimensions))
+		np.random.seed(41)
 		self.syncmap= np.random.rand(input_size,dimensions)
 		self.adaptation_rate= adaptation_rate
 		self.total_activation= np.zeros(input_size)
@@ -176,7 +177,7 @@ class SyncMap:
 		plt.show()
 		plt.close()
 
-# %% ../nbs/00_core.ipynb 5
+# %% ../nbs/00_core.ipynb 6
 # extract data from parameter space
 
 @patch
@@ -211,7 +212,7 @@ def plot_activity_maps(self:SyncMap, x = 0, y = 0):
 # SyncMap.generate_activity_probs = generate_activity_probs
 # SyncMap.plot_activity_maps = plot_activity_maps
 
-# %% ../nbs/00_core.ipynb 20
+# %% ../nbs/00_core.ipynb 26
 @patch
 def extract_act_var(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
     '''
