@@ -3,4 +3,5 @@ website:
     contents:
       - index.ipynb
       - 00_core.ipynb
+      - 01_Graph_Processor.ipynb
       - 99_utility.ipynb
