@@ -1,0 +1,72 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SyncMap-Draft",
+    "section": "",
+    "text": "SyncMap",
+    "crumbs": [
+      "SyncMap-Draft"
+    ]
+  },
+  {
+    "objectID": "graph_processor.html",
+    "href": "graph_processor.html",
+    "title": "Graph Processor",
+    "section": "",
+    "text": "Take care of graph data\n\n\nsource\n\nGraphProcessor\n\n GraphProcessor (file_path=None)\n\nInitialize self. See help(type(self)) for accurate signature.\n\n# read a graph from file\ntemp_path = f'../data/probabilistic5_6.dot'\ntemp_graph = nx.DiGraph(nx.nx_agraph.read_dot(temp_path))\ntemp_graph\n\n&lt;networkx.classes.digraph.DiGraph&gt;\n\n\n\n# show the nodes and labels\nfor idx, node in enumerate(temp_graph.nodes):\n    print(node, temp_graph.nodes[node])\n\n0 {'label': '1'}\n1 {'label': '1'}\n2 {'label': '1'}\n3 {'label': '1'}\n4 {'label': '1'}\n5 {'label': '1'}\n6 {'label': '2'}\n7 {'label': '2'}\n8 {'label': '2'}\n9 {'label': '2'}\n10 {'label': '2'}\n11 {'label': '2'}\n12 {'label': '3'}\n13 {'label': '3'}\n14 {'label': '3'}\n15 {'label': '3'}\n16 {'label': '3'}\n17 {'label': '3'}\n18 {'label': '4'}\n19 {'label': '4'}\n20 {'label': '4'}\n21 {'label': '4'}\n22 {'label': '4'}\n23 {'label': '4'}\n24 {'label': '5'}\n25 {'label': '5'}\n26 {'label': '5'}\n27 {'label': '5'}\n28 {'label': '5'}\n29 {'label': '5'}\n\n\n\n# convert labels to numpy\nlabels = {node: temp_graph.nodes[node]['label'] for node in temp_graph.nodes}\n# convert labels to numpy int\nlabels_numpy = np.array([int(labels[node]) for node in temp_graph.nodes])\n\nlabels_numpy\n\narray([1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4,\n       4, 4, 5, 5, 5, 5, 5, 5])\n\n\n\n# create a graph processor object\ntemp_path = f'../data/probabilistic5_6.dot'\ngraph1 = GraphProcessor(file_path = temp_path)\n\ngraph1.read_graph_from_dot()\n\nGraph loaded from file: ../data/probabilistic5_6.dot\nNumber of nodes: 30\nNumber of edges: 170\n\n\n\nsource\n\n\nGraphProcessor.visualize_graph\n\n GraphProcessor.visualize_graph ()\n\n\n# temp_path = f'../data/probabilistic5_6.dot'\n# graph1 = GraphProcessor(file_path = temp_path)\n\n# graph1.read_graph_from_dot()\n\ngraph1.visualize_graph()\n\n\n\n\n\n\n\n\n\nsource\n\n\nGraphProcessor.get_groundtruth_labels\n\n GraphProcessor.get_groundtruth_labels (dtype='numpy')\n\n\nprint(graph1.get_groundtruth_labels(dtype = 'numpy'))\nprint(graph1.get_groundtruth_labels(dtype = 'dict'))\n\n[1 1 1 1 1 1 2 2 2 2 2 2 3 3 3 3 3 3 4 4 4 4 4 4 5 5 5 5 5 5]\n{'0': '1', '1': '1', '2': '1', '3': '1', '4': '1', '5': '1', '6': '2', '7': '2', '8': '2', '9': '2', '10': '2', '11': '2', '12': '3', '13': '3', '14': '3', '15': '3', '16': '3', '17': '3', '18': '4', '19': '4', '20': '4', '21': '4', '22': '4', '23': '4', '24': '5', '25': '5', '26': '5', '27': '5', '28': '5', '29': '5'}\n\n\n\nsource\n\n\nGraphProcessor.get_connection_matrix\n\n GraphProcessor.get_connection_matrix ()\n\n\nsns.heatmap(graph1.get_connection_matrix())\n\n\n\n\n\n\n\n\n\nsource\n\n\nGraphProcessor.set_graph_from_adjacency_matrix\n\n GraphProcessor.set_graph_from_adjacency_matrix (A)\n\n\n# A = np.random.randn(30,30)\nA = np.random.choice([0,1], (30,30))\nprint(A.shape)\ngraph1.set_graph_from_adjacency_matrix(A)\nfig, axs = plt.subplots(1, 2, figsize=(10, 5))\nsns.heatmap(graph1.get_connection_matrix(), ax=axs[0])\naxs[1] = graph1.visualize_graph()\n\n(30, 30)\n\n\n\n\n\n\n\n\n\n\nsource\n\n\nGraphProcessor.random_walk_on_graph\n\n GraphProcessor.random_walk_on_graph (connection_matrix=None, L=3000,\n                                      reset_time=None)\n\n\n# regenerate the graph\ntemp_path = f'../data/probabilistic5_6.dot'\ngraph1 = GraphProcessor(file_path = temp_path)\n\ngraph1.read_graph_from_dot()\n\nGraph loaded from file: ../data/probabilistic5_6.dot\nNumber of nodes: 30\nNumber of edges: 170\n\n\n\ntraj, one_hot = graph1.random_walk_on_graph(L = 300)\n\nRandom walk starting node: 23\n\n\n100%|██████████| 300/300 [00:00&lt;00:00, 46689.84it/s]\n\n\n\nprint(traj.shape)\nsns.heatmap(one_hot)\n\n(300,)",
+    "crumbs": [
+      "Graph Processor"
+    ]
+  },
+  {
+    "objectID": "utility.html",
+    "href": "utility.html",
+    "title": "utility",
+    "section": "",
+    "text": "source",
+    "crumbs": [
+      "utility"
+    ]
+  },
+  {
+    "objectID": "utility.html#plotly-for-visualization",
+    "href": "utility.html#plotly-for-visualization",
+    "title": "utility",
+    "section": "plotly for visualization",
+    "text": "plotly for visualization\na plotly function named plot_raw_data was created for show a interactive plot in github page.\n\nsource\n\nOverlapChunkTest1.plot_raw_data\n\n OverlapChunkTest1.plot_raw_data (values:numpy.ndarray,\n                                  labels:numpy.ndarray=None, save=False)\n\nPlot the encoded data. args: values: np.ndarray input_class: np.ndarray, label save: bool, default False\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nvalues\nndarray\n\ntime series data\n\n\nlabels\nndarray\nNone\nthe labels\n\n\nsave\nbool\nFalse\n\n\n\n\n\ntime_delay = 10\nenv = OverlapChunkTest1(time_delay)\n\ninput_sequence, input_class = env.getSequence(sequence_length)\ninput_sequence.shape, input_class.shape\n\n((10000, 8), (10000,))\n\n\n\nfig1 = env.plot_raw_data(input_sequence, input_class)\n# HTML(fig1.to_html(include_plotlyjs='cdn'))\n\n\nfig1.show()  #　点線　　it can be regarded as noise\n\n                                                \n\n\n\nfig2 = env.plot_raw_data(input_sequence)\nfig2.show()",
+    "crumbs": [
+      "utility"
+    ]
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "SyncMap-core",
+    "section": "",
+    "text": "source",
+    "crumbs": [
+      "SyncMap-core"
+    ]
+  },
+  {
+    "objectID": "core.html#compute-generative-probability",
+    "href": "core.html#compute-generative-probability",
+    "title": "SyncMap-core",
+    "section": "compute generative probability",
+    "text": "compute generative probability\n\nsource\n\nSyncMap.plot_activity_maps\n\n SyncMap.plot_activity_maps (x=0, y=0)\n\n\nsource\n\n\nSyncMap.generate_activity_probs\n\n SyncMap.generate_activity_probs (sample_x=0, sample_y=0, err=0.0001)\n\nGenerate the activity probabilities of each variable in syncmap return: np.array, shape = (self.output_size, )\n\n# initialize the environment\ntime_delay = 10\nenv = OverlapChunkTest1(time_delay)\noutput_size = env.getOutputSize()\noutput_size\n\n# sequence_length = 1000000\nsequence_length = 100000\n\n####### SyncMap #####\nnumber_of_nodes= output_size\nadaptation_rate= 0.001*output_size\nprint(\"Adaptation rate:\", adaptation_rate)\nmap_dimensions= 2\nneuron_group= SyncMap(number_of_nodes, map_dimensions, adaptation_rate)\ninput_sequence, input_class = env.getSequence(sequence_length)\n\n\nneuron_group.input(input_sequence)\nlabels= neuron_group.organize()\n\nprint(\"Learned Labels: \",labels)\nprint(\"Correct Labels: \",env.trueLabel())\n\n\n# Learned Labels:  [ 0  0 -1  1  1 -1  2  2]\n# Correct Labels:  [0 0 0 1 1 2 2 2]\n\n\n# # plot input data and labels\n# env.plot(input_class[:800], input_sequence[:800])\n\n\n# # plot the encoded data\n# env.plotSuperposed(input_class[:200], input_sequence[:200])\n\n\n# neuron_group.plotSequence(input_sequence, input_class)\n\n\nnp.random.seed(42)\nSyncMap_weight = np.random.rand(output_size, map_dimensions)\nplt.scatter(SyncMap_weight[:, 0], SyncMap_weight[:, 1])\n\n\nnp.random.seed(42)\noutput_size = 8\nmap_dimensions = 2\nSyncMap_weight = np.random.rand(output_size, map_dimensions)\n\n# Create an array of colors, one for each point\n# colors = np.random.rand(output_size)\n\nplt.scatter(SyncMap_weight[:, 0], SyncMap_weight[:, 1], c=['red', 'red', 'red', 'blue', 'blue', 'black', 'black', 'black'])\n# legend\nplt.colorbar()\nplt.show()\n\n\nnp.random.seed(41)\noutput_size = 8\nmap_dimensions = 2\nSyncMap_weight = np.random.rand(output_size, map_dimensions)\n\n# Create an array of colors, one for each point\n# colors = np.random.rand(output_size)\n\nplt.scatter(SyncMap_weight[:, 0], SyncMap_weight[:, 1], c=['red', 'red', 'red', 'blue', 'blue', 'black', 'black', 'black'])\n# legend\nplt.colorbar()\nplt.show()\n\n\nplt.scatter(neuron_group.syncmap[:, 0], neuron_group.syncmap[:, 1], color = 'red')\n\n\nneuron_group.syncmap\n\n\nneuron_group.generate_activity_probs(sample_x = 0, sample_y = 0)\n\n\nneuron_group.plot_activity_maps(x = 1, y = -2.5)\n\n\na = np.around(compute_combi_dist(neuron_group.syncmap), decimals = 4) \na\n\n\nb = np.around(np.exp(-a), decimals = 4)\nb\n\n\npos = np.where(a == a.max())[0]\npos, a.__getitem__(tuple(pos)), a[pos]",
+    "crumbs": [
+      "SyncMap-core"
+    ]
+  },
+  {
+    "objectID": "core.html#generate-data-from-generative-probability",
+    "href": "core.html#generate-data-from-generative-probability",
+    "title": "SyncMap-core",
+    "section": "generate data from generative probability",
+    "text": "generate data from generative probability\n\nsource\n\nSyncMap.create_series\n\n SyncMap.create_series (x, y, env, seq_len=1000)\n\ngenerate time series data\n\nsource\n\n\nSyncMap.create_element\n\n SyncMap.create_element (sampled_var, env)\n\ncreate an element of the time series of the sampled variable\n\nsource\n\n\nSyncMap.extract_act_var\n\n SyncMap.extract_act_var (sample_x=0, sample_y=0, err=0.0001)\n\ncheck if there is any activated variables\n\n(env.time_delay, env.output_size)\n\n\nneuron_group.extract_act_var(1, -2.5)\n\n\nneuron_group.create_series(x = 1, y = -2.5, env = env)\n\n\n\ninput data pattern\n\nchrunk 0: the variable 0, 1, 2, 3, 4 could be activated\nchrunk 1: the variable 3, 4, 5, 6 ,7 could be activated\n\n\ntemp_sequence = input_sequence.copy()\n\n\ntemp_sequence[temp_sequence &lt; 0.999] = 0\n# temp_sequence[temp_sequence == 1] = 0\n\n\nnp.unique(temp_sequence, return_counts=True)\n\n\nnp.unique(input_class, return_counts=True)\n\n\nenv.plot_raw_data(input_sequence, input_class)\n\n\nchunk 0\n\nenv.plot_raw_data(temp_sequence[input_class==0, :], input_class[input_class==0])\n\n\n\nchunk 1\n\nenv.plot_raw_data(temp_sequence[input_class==1, :], input_class[input_class==1])\n\n\n\ngenerated\n\nenv.plot_raw_data(\n    values = neuron_group.create_series(x = 1, y = -2.5, env = env, seq_len = 10000),\n    labels = None\n    )",
+    "crumbs": [
+      "SyncMap-core"
+    ]
+  }
+]
