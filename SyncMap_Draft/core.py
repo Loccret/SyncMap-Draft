@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['SyncMap', 'SymmetricalSyncMap']
 
-# %% ../nbs/00_core.ipynb 3
+# %% ../nbs/00_core.ipynb 2
 import pandas as pd
 
 import numpy as np
@@ -22,7 +22,7 @@ from sklearn.manifold import TSNE
 import sys
 # sys.path.insert(0, '../')
 # 如果没有 pip install -e . 下面一行就不会成功
-from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist
+from .utility import OverlapChunkTest1, to_categorical, compute_combi_dist, reduce_dimension_with_tsne, create_trace_plot
 
 from .processor import GraphProcessor, WorkingMemProcessor, Readout
 from fastcore.utils import *
@@ -34,7 +34,7 @@ import time
 # from ipywidgets import widgets
 # from IPython.display import display
 
-# %% ../nbs/00_core.ipynb 5
+# %% ../nbs/00_core.ipynb 4
 class SyncMap:
 	'''
 	The original syncmap
@@ -179,7 +179,7 @@ class SyncMap:
 		plt.show()
 		plt.close()
 
-# %% ../nbs/00_core.ipynb 7
+# %% ../nbs/00_core.ipynb 6
 # extract data from parameter space
 
 @patch
@@ -214,7 +214,7 @@ def plot_activity_maps(self:SyncMap, x = 0, y = 0):
 # SyncMap.generate_activity_probs = generate_activity_probs
 # SyncMap.plot_activity_maps = plot_activity_maps
 
-# %% ../nbs/00_core.ipynb 27
+# %% ../nbs/00_core.ipynb 26
 @patch
 def extract_act_var(self:SyncMap, sample_x = 0, sample_y = 0, err = 1e-4):
     '''
@@ -256,7 +256,7 @@ def create_series(self:SyncMap, x, y, env, seq_len = 1000):
         time_series.append(tiny_series)
     return np.array(time_series)
 
-# %% ../nbs/00_core.ipynb 42
+# %% ../nbs/00_core.ipynb 41
 class SymmetricalSyncMap:
     def __init__(self, input_size, dimensions=3, 
                 adaptation_rate=0.1, space_scale=1.0, space_bound=None,
@@ -290,6 +290,8 @@ class SymmetricalSyncMap:
         self.is_adaptive_LR = is_adaptive_LR
         self.adaptive_LR = 1
         self.adaptive_LR_widrow_hoff = adaptive_LR_widrow_hoff
+
+        self.fit_log = []
 
 
 
@@ -357,6 +359,7 @@ class SymmetricalSyncMap:
         # leaking
         self.syncmap = self.leaking_rate * self.syncmap + (1 - self.leaking_rate) * syncmap_previous
 
+        self.fit_log.append(self.syncmap.copy())
         return self.syncmap
 
 
