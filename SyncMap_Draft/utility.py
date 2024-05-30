@@ -345,8 +345,8 @@ def create_trace_plot(data, colors = None):
 
     # Update layout for animation
     fig.update_layout(
-        width=600,  # 10 inches * 100 pixels per inch
-        height=600,  # 10 inches * 100 pixels per inch
+        width=500,  # 10 inches * 100 pixels per inch
+        height=500,  # 10 inches * 100 pixels per inch
         margin=dict(l=20, r=20, t=20, b=20),
         xaxis=dict(range=[x_min, x_max], constrain='domain'),
         yaxis=dict(range=[y_min, y_max], scaleanchor="x", scaleratio=1, constrain='domain'),
@@ -358,7 +358,7 @@ def create_trace_plot(data, colors = None):
             {
                 "buttons": [
                     {
-                        "args": [None, {"frame": {"duration": 500, "redraw": True}, "fromcurrent": True}],
+                        "args": [None, {"frame": {"duration": 800, "redraw": True}, "fromcurrent": True}],
                         "label": "Play",
                         "method": "animate"
                     },
