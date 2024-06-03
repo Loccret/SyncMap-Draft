@@ -447,29 +447,52 @@ class LightSyncMap:
 		np.random.seed(40)
 		self.syncmap= np.random.rand(input_size,dimensions)
 		self.adaptation_rate= adaptation_rate
-	
+		self.fit_log = []
+
+	@property
+	def log(self):
+		return np.asarray(self.fit_log)
+
 	def fit(self, input_sequence):
 		for idx, state in tqdm(enumerate(input_sequence), total=len(input_sequence)):
 			vplus, vminus = self.get_postive_and_negative_state(state)
 			self.one_step_organize(vplus, vminus)
 			
-		
-
 
 	def get_postive_and_negative_state(self, state):
+		'''
+			adentify the state whether is activated and deactivated
+		args:
+			state(d): np.ndarray, the one step input sequence, d is the number of feature of input
+		return:
+			plus, minus(D): np.ndarray, th elements are boolean representing the activated and deactivated state
+		'''
 		plus= state > 0.1
 		minus = ~ plus
 		return plus, minus
 		
 
+	def get_center(self, arr):
+		'''
+		calculate the mass center of the input arrays.
+		If the activated or deactivated state just one sample, return  None
+		args:
+			arr(n, d): np.array,
+		'''
+		arr_mass = arr.sum()
+		if arr_mass <= 1:
+			return None
+		else:
+			return (arr @ self.syncmap) / arr_mass
+
 	def one_step_organize(self, vplus, vminus):
-		syncmap_previous = self.syncmap.copy()
+		# syncmap_previous = self.syncmap.copy()
 
 		plus_mass = vplus.sum()
 		minus_mass = vminus.sum()
 
 		if plus_mass <= 1 or minus_mass <= 1:
-			return syncmap_previous
+			return None # syncmap_previous
 		
 		center_plus=  (vplus  @ self.syncmap)/plus_mass
 		center_minus= (vminus @ self.syncmap)/minus_mass
@@ -485,6 +508,8 @@ class LightSyncMap:
 
 		maximum=self.syncmap.max()
 		self.syncmap= self.space_size*self.syncmap/maximum
+
+		self.fit_log.append(self.syncmap.copy())
 			
 	def cluster(self):
 	
