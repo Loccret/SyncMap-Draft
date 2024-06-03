@@ -432,7 +432,7 @@ class SymmetricalSyncMap:
         self.adaptation_rate = adaptation_rate
 
 
-# %% ../nbs/00_core.ipynb 51
+# %% ../nbs/00_core.ipynb 52
 class LightSyncMap:
 	'''
 	The original syncmap
@@ -477,25 +477,23 @@ class LightSyncMap:
 		calculate the mass center of the input arrays.
 		If the activated or deactivated state just one sample, return  None
 		args:
-			arr(n, d): np.array,
+			arr(d): np.array, features
 		'''
 		arr_mass = arr.sum()
 		if arr_mass <= 1:
 			return None
+		# elif arr_mass == arr.shape[0]:
+		# 	return None
 		else:
-			return (arr @ self.syncmap) / arr_mass
+			return (arr @ self.syncmap) / arr_mass  # (D,) @ (D, d) -> (d,); D: features of input, d: features of syncmap
 
 	def one_step_organize(self, vplus, vminus):
 		# syncmap_previous = self.syncmap.copy()
-
-		plus_mass = vplus.sum()
-		minus_mass = vminus.sum()
-
-		if plus_mass <= 1 or minus_mass <= 1:
-			return None # syncmap_previous
+		center_plus  = self.get_center(vplus)
+		center_minus = self.get_center(vminus)
 		
-		center_plus=  (vplus  @ self.syncmap)/plus_mass
-		center_minus= (vminus @ self.syncmap)/minus_mass
+		if center_plus is None or center_minus is None:
+			return None
 
 		dist_plus= distance.cdist(center_plus[None,:], self.syncmap, 'euclidean').T
 		dist_minus= distance.cdist(center_minus[None,:], self.syncmap, 'euclidean').T
@@ -503,11 +501,14 @@ class LightSyncMap:
 		update_plus= vplus[:,np.newaxis]*((center_plus - self.syncmap)/dist_plus)
 		update_minus= vminus[:,np.newaxis]*((center_minus -self.syncmap)/dist_minus)
 
+		# disable the update of too far nodes
+		update_minus[dist_minus.squeeze()>1] = 0
+
 		update = update_plus - update_minus
 		self.syncmap += self.adaptation_rate*update
 
-		maximum=self.syncmap.max()
-		self.syncmap= self.space_size*self.syncmap/maximum
+		# maximum=self.syncmap.max()
+		# self.syncmap= self.space_size*self.syncmap / maximum
 
 		self.fit_log.append(self.syncmap.copy())
 			
