@@ -447,7 +447,9 @@ class LightSyncMap:
 		np.random.seed(40)
 		self.syncmap= np.random.rand(input_size,dimensions)
 		self.adaptation_rate= adaptation_rate
+
 		self.fit_log = []
+		self.delay_effect = 0.8
 
 	@property
 	def log(self):
@@ -456,8 +458,9 @@ class LightSyncMap:
 	def fit(self, input_sequence):
 		for idx, state in tqdm(enumerate(input_sequence), total=len(input_sequence)):
 			vplus, vminus = self.get_postive_and_negative_state(state)
-			self.one_step_organize(vplus, vminus)
-			
+			new_snycmap = self.one_step_organize(vplus, vminus)
+			if new_snycmap is not None:
+				self.syncmap = new_snycmap[:]
 
 	def get_postive_and_negative_state(self, state):
 		'''
@@ -472,7 +475,7 @@ class LightSyncMap:
 		return plus, minus
 		
 
-	def get_center(self, arr):
+	def get_center(self, arr, syncmap_arr):
 		'''
 		calculate the mass center of the input arrays.
 		If the activated or deactivated state just one sample, return  None
@@ -485,35 +488,46 @@ class LightSyncMap:
 		# elif arr_mass == arr.shape[0]:
 		# 	return None
 		else:
-			return (arr @ self.syncmap) / arr_mass  # (D,) @ (D, d) -> (d,); D: features of input, d: features of syncmap
+			return (arr @ syncmap_arr) / arr_mass  # (D,) @ (D, d) -> (d,); D: features of input, d: features of syncmap
+
+
+	def update(self, update_plus, update_minus, syncmap_arr):
+		'''
+		update the syncmap
+		args:
+			update_plus(d, D): np.ndarray, the update of activated state
+			update_minus(d, D): np.ndarray, the update of deactivated state
+		'''
+		update = update_plus - update_minus
+		syncmap_arr += self.adaptation_rate * update
+		maximum = syncmap_arr.max()
+		return syncmap_arr / maximum # self.space_size*
+
 
 	def one_step_organize(self, vplus, vminus):
-		# syncmap_previous = self.syncmap.copy()
-		center_plus  = self.get_center(vplus)
-		center_minus = self.get_center(vminus)
+		syncmap_previous = self.syncmap.copy()
+		center_plus  = self.get_center(vplus, syncmap_previous)
+		center_minus = self.get_center(vminus, syncmap_previous)
 		
 		if center_plus is None or center_minus is None:
 			return None
 
-		dist_plus= distance.cdist(center_plus[None,:], self.syncmap, 'euclidean').T
-		dist_minus= distance.cdist(center_minus[None,:], self.syncmap, 'euclidean').T
+		dist_plus= distance.cdist(center_plus[None,:], syncmap_previous, 'euclidean').T
+		dist_minus= distance.cdist(center_minus[None,:], syncmap_previous, 'euclidean').T
 
-		update_plus= vplus[:,np.newaxis]*((center_plus - self.syncmap)/dist_plus)
-		update_minus= vminus[:,np.newaxis]*((center_minus -self.syncmap)/dist_minus)
+		update_plus= vplus[:,np.newaxis]*((center_plus - syncmap_previous)/dist_plus)
+		update_minus= vminus[:,np.newaxis]*((center_minus - syncmap_previous)/dist_minus)
 
 		# disable the update of too far nodes
-		update_minus[dist_minus.squeeze()>1] = 0
+		# update_plus[dist_plus.squeeze()>0.5] = 0
+		# update_minus[dist_minus.squeeze()>0.5] = 0
 
-		update = update_plus - update_minus
-		self.syncmap += self.adaptation_rate*update
-
-		# maximum=self.syncmap.max()
-		# self.syncmap= self.space_size*self.syncmap / maximum
-
-		self.fit_log.append(self.syncmap.copy())
+		new_syncmap = self.update(update_plus, update_minus, syncmap_previous)
+		
+		self.fit_log.append(new_syncmap)
+		return new_syncmap
 			
 	def cluster(self):
-	
 		self.organized= True
 		# self.labels= DBSCAN(eps=3, min_samples=2).fit_predict(self.syncmap)
 		self.labels= DBSCAN(eps=0.8, min_samples=2).fit_predict(self.syncmap)
