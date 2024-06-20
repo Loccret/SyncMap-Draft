@@ -536,7 +536,7 @@ class LightSyncMap:
 	def cluster(self):
 		self.organized= True
 		# self.labels= DBSCAN(eps=3, min_samples=2).fit_predict(self.syncmap)
-		self.labels= DBSCAN(eps=0.4, min_samples=2).fit_predict(self.syncmap)
+		self.labels= DBSCAN(eps=1, min_samples=2).fit_predict(self.syncmap)
 
 		return self.labels
 
@@ -576,7 +576,8 @@ class NodeSyncMap(LightSyncMap):
         self.minus_factor = 0.1
         self.repel_range = 1
         self.attract_range = 0.0001
-
+        self.history_repel = np.zeros((input_size, input_size))
+        
         # self.plus_factor = 1
         # self.minus_factor = 0.1
         # self.repel_range = 1
@@ -705,8 +706,14 @@ class NodeSyncMap(LightSyncMap):
     def exp_update(self, dist, affective_range):
         return np.exp(- dist / affective_range)
 
-    # def repel_constant_update(self, repel_constant, vplus, vminus):
-        
+    def repel_constant_update(self, plus_mask, minus_mask):
+        '''
+            return: (N, N, D)
+        '''
+        self.history_repel += minus_mask
+        self.history_repel[plus_mask] = 0
+        self.history_repel = np.minimum(self.history_repel, 1000)
+        return self.history_repel[:,:,np.newaxis]/1000
 
     def compute_update(self, syncmap_previous, vplus, vminus):
         all2all_distance = self.calculate_pairwise_distances(syncmap_previous)  # (N, N)
@@ -718,8 +725,12 @@ class NodeSyncMap(LightSyncMap):
         minus_mask = (vminus[:, np.newaxis] @ vminus[np.newaxis, :])  # 防止正向对fuixiang
         plus_mask  = (vplus[:, np.newaxis] @ vplus[np.newaxis, :])
 
-        update_minus = all_coordinate_diff_sin_cos.copy() * self.exp_update(
-            all2all_distance.copy()[:, :, np.newaxis], self.repel_range)
+        # update_minus = all_coordinate_diff_sin_cos.copy() * self.exp_update(
+        #     all2all_distance.copy()[:, :, np.newaxis], self.repel_range) * (1+ self.repel_constant_update(plus_mask, minus_mask))
+
+
+        update_minus = all_coordinate_diff_sin_cos.copy() * (self.exp_update(
+            all2all_distance.copy()[:, :, np.newaxis], self.repel_range) + self.repel_constant_update(plus_mask, minus_mask))
         
         # update_minus = all_coordinate_diff_sin_cos.copy()
         update_plus = -all_coordinate_diff_sin_cos.copy() * (1 + self.exp_update(
@@ -742,9 +753,6 @@ class NodeSyncMap(LightSyncMap):
         # update_plus[update_plus>20] = 20
         # update_plus[update_plus<-20] = -20
 
-        # update_minus = all_coordinate_diff_sin_cos * vminus[:,np.newaxis]
-        # 其实在这里稍微改一下就可以把vplus也算出来
-        # update_plus =  - all_coordinate_diff_sin_cos * vplus[:,np.newaxis]
         return self.plus_factor * update_plus, self.minus_factor * update_minus
 
 
