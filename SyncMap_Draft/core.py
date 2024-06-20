@@ -568,12 +568,21 @@ class NodeSyncMap(LightSyncMap):
     def __init__(self, input_size, dimensions, adaptation_rate, ):
         super().__init__(input_size, dimensions, adaptation_rate)
         # self.plus_factor = 1
-        # self.minus_factor = 0.5
-        # self.repel_range = 0.2
+        # self.minus_factor = 0.1
+        # self.repel_range = 1
+        # self.attract_range = 1
         # TODO: turing the above into a parameter
         self.plus_factor = 1
         self.minus_factor = 0.1
         self.repel_range = 1
+        self.attract_range = 0.0001
+
+        # self.plus_factor = 1
+        # self.minus_factor = 0.1
+        # self.repel_range = 1
+        # self.attract_range = 0.0001
+  
+        # attract_range = 0.0001 ~ 无吸引力变化
     def calculate_pairwise_distances(self, arr):
         """
         Calculate the pairwise distances between samples in a NumPy array.
@@ -693,8 +702,11 @@ class NodeSyncMap(LightSyncMap):
     #     # update_plus =  - all_coordinate_diff_sin_cos * vplus[:,np.newaxis]
     #     return self.plus_factor * update_plus, self.minus_factor * update_minus
 
-    def exp_update(self, dist_minus):
-        return np.exp(- dist_minus / self.repel_range)
+    def exp_update(self, dist, affective_range):
+        return np.exp(- dist / affective_range)
+
+    # def repel_constant_update(self, repel_constant, vplus, vminus):
+        
 
     def compute_update(self, syncmap_previous, vplus, vminus):
         all2all_distance = self.calculate_pairwise_distances(syncmap_previous)  # (N, N)
@@ -702,18 +714,18 @@ class NodeSyncMap(LightSyncMap):
         
         with np.errstate(divide='ignore', invalid='ignore'):
             all_coordinate_diff_sin_cos = np.nan_to_num(all_coordinate_diff / all2all_distance[:, :, np.newaxis] ** 1, nan=0)  # ** 2是为了引入距离关系， ** 1仅仅是方向向量 （N, N, D）
-        # TODO: 平方反比太大了，用指数吧
         # 在sum之前乘以系数可以为每个variable的排斥力加权； 
         minus_mask = (vminus[:, np.newaxis] @ vminus[np.newaxis, :])  # 防止正向对fuixiang
         plus_mask  = (vplus[:, np.newaxis] @ vplus[np.newaxis, :])
 
-        update_minus = self.exp_update(
-            all2all_distance.copy()[:, :, np.newaxis]) * all_coordinate_diff_sin_cos.copy()
-        # update_minus = all_coordinate_diff_sin_cos.copy()
-        update_plus = -all_coordinate_diff_sin_cos.copy()  # 由于87行表明的原始方向是排斥的，所以这里是负号
-        update_minus[~minus_mask] = 0  # ~minus_mask: 所有含有正向的variables update全部置零
- 
+        update_minus = all_coordinate_diff_sin_cos.copy() * self.exp_update(
+            all2all_distance.copy()[:, :, np.newaxis], self.repel_range)
         
+        # update_minus = all_coordinate_diff_sin_cos.copy()
+        update_plus = -all_coordinate_diff_sin_cos.copy() * (1 + self.exp_update(
+            all2all_distance.copy()[:, :, np.newaxis], self.attract_range))  # 由于87行表明的原始方向是排斥的，所以这里是负号
+
+        update_minus[~minus_mask] = 0  # ~minus_mask: 所有含有正向的variables update全部置零
         update_plus[~plus_mask] = 0
 
 
@@ -724,11 +736,11 @@ class NodeSyncMap(LightSyncMap):
         update_minus = update_minus.sum(axis=0)
         update_plus = update_plus.sum(axis=0)
 
-        update_minus[update_minus>20] = 20
-        update_minus[update_minus<-20] = -20
+        # update_minus[update_minus>20] = 20
+        # update_minus[update_minus<-20] = -20
 
-        update_plus[update_plus>20] = 20
-        update_plus[update_plus<-20] = -20
+        # update_plus[update_plus>20] = 20
+        # update_plus[update_plus<-20] = -20
 
         # update_minus = all_coordinate_diff_sin_cos * vminus[:,np.newaxis]
         # 其实在这里稍微改一下就可以把vplus也算出来
