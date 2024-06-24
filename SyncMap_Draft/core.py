@@ -278,6 +278,7 @@ class SymmetricalSyncMap:
         self.dropout_negative = dropout_negative
 
         # initialize the sync map
+        np.random.seed(40)
         self.syncmap = np.random.rand(self.input_size, self.dimensions) * self.space_scale
         self.syncmap = ((self.syncmap - np.mean(self.syncmap, axis=0)) / (np.std(self.syncmap, axis=0) + 1e-12)) * self.space_scale
 
@@ -297,6 +298,9 @@ class SymmetricalSyncMap:
         self.fit_log = []
 
 
+    @property
+    def log(self):
+        return np.asarray(self.fit_log)
 
     def input_sequential(self, input_seq, current_state=None, Verbose_tqdm=True):
         # start processing
@@ -435,7 +439,7 @@ class SymmetricalSyncMap:
         self.adaptation_rate = adaptation_rate
 
 
-# %% ../nbs/00_core.ipynb 51
+# %% ../nbs/00_core.ipynb 56
 class LightSyncMap:
 	'''
 	The original syncmap
@@ -554,7 +558,7 @@ class LightSyncMap:
 
 		return self.labels[max_index]
 
-# %% ../nbs/00_core.ipynb 63
+# %% ../nbs/00_core.ipynb 68
 # class SMNode(object):
 #     def __init__(self, dimensions):
 #         self.dimensions = dimensions
@@ -567,23 +571,13 @@ class LightSyncMap:
 class NodeSyncMap(LightSyncMap):
     def __init__(self, input_size, dimensions, adaptation_rate, ):
         super().__init__(input_size, dimensions, adaptation_rate)
-        # self.plus_factor = 1
-        # self.minus_factor = 0.1
-        # self.repel_range = 1
-        # self.attract_range = 1
-        # TODO: turing the above into a parameter
         self.plus_factor = 1
         self.minus_factor = 0.1
         self.repel_range = 1
         self.attract_range = 0.0001
         self.history_repel = np.zeros((input_size, input_size))
-        
-        # self.plus_factor = 1
-        # self.minus_factor = 0.1
-        # self.repel_range = 1
-        # self.attract_range = 0.0001
-  
-        # attract_range = 0.0001 ~ 无吸引力变化
+
+
     def calculate_pairwise_distances(self, arr):
         """
         Calculate the pairwise distances between samples in a NumPy array.
@@ -707,6 +701,7 @@ class NodeSyncMap(LightSyncMap):
         return np.exp(- dist / affective_range)
 
     def repel_constant_update(self, plus_mask, minus_mask):
+        # 排斥重来没有连接过的
         '''
             return: (N, N, D)
         '''

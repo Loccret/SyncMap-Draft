@@ -2,17 +2,23 @@
 
 # %% auto 0
 __all__ = ['to_categorical', 'OverlapChunkTest1', 'compute_combi_dist', 'reduce_dimension_with_tsne', 'create_trace_plot',
-           'labels2colors']
+           'labels2colors', 'compute_nmi']
 
 # %% ../nbs/99_utility.ipynb 3
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 import math
 import warnings
 # import fastcore.all as fc
 from fastcore.utils import *  # for patch
 from sklearn.manifold import TSNE
 from IPython.display import HTML
+
+from sklearn.cluster import DBSCAN
+from sklearn.metrics import normalized_mutual_info_score
+
+sns.set_theme()
 
 # %% ../nbs/99_utility.ipynb 7
 def to_categorical(x, num_classes=None):
@@ -433,3 +439,22 @@ def create_trace_plot(data, colors = None):
 def labels2colors(labels):
     colorbar = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'pink', 'brown', 'gray']
     return [colorbar[label] for label in labels]
+
+# %% ../nbs/99_utility.ipynb 32
+def compute_nmi(variables, labels):
+    '''
+    Compute the normalized mutual information.
+    args:
+        variables(T, N, D): np.ndarray, N variables with D dimensions at Ts time steps
+        labels(N, ): np.ndarray, labels of the N variables
+    return:
+        np.ndarray, shape (T, ), the NMI at each time step
+    '''
+    preds = []
+    nmi = []
+    for i in range(variables.shape[0]):
+        preds.append(DBSCAN(eps=1, min_samples=2).fit_predict(variables[i]))
+        nmi.append(normalized_mutual_info_score(labels, preds[i]))
+
+    return np.array(nmi)
+
