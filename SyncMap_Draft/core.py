@@ -446,7 +446,7 @@ class LightSyncMap:
 	'''
 	The original syncmap
 	'''
-	def __init__(self, input_size, dimensions, adaptation_rate):
+	def __init__(self, input_size, dimensions, adaptation_rate, use_tqdm = True):
 		
 		self.organized= False
 		self.space_size= 10
@@ -459,16 +459,23 @@ class LightSyncMap:
 		self.delay_effect = 0.8
 		self.fit_log = []
 
+		self.use_tqdm = use_tqdm
+
 
 	@property  # 在class内部引用这个函数贼慢
 	def log(self):
 		return np.asarray(self.fit_log)
 
+	def maybe_tqdm(self, iterable, total=None, use_tqdm=True):
+		if use_tqdm:
+			return tqdm(iterable, total=total)
+		return iterable
+
 	def fit(self, input_sequence):
-		for idx, state in tqdm(enumerate(input_sequence), total=len(input_sequence)):
+
+
+		for idx, state in self.maybe_tqdm(enumerate(input_sequence), total=len(input_sequence), use_tqdm=self.use_tqdm):
 			vplus, vminus = self.get_postive_and_negative_state(state)
-			if idx == 39:
-				x0 = None
 			new_snycmap = self.one_step_organize(vplus, vminus)
 
 			if new_snycmap is not None:
@@ -606,9 +613,10 @@ class NodeSyncMap(LightSyncMap):
     def __init__(self, input_size, dimensions, adaptation_rate, 
                 plus_factor = 1, minus_factor = 0.1, attract_range = 0.0001, 
                 repel_range = 1,plus_exp_factor = 0.2, minus_exp_factor = 1,
-                history_repel_factor = 1000, max_track_length = 2
+                history_repel_factor = 1000, max_track_length = 2,
+                max_past_activate = 0.001, use_tqdm = True
                 ):
-        super().__init__(input_size, dimensions, adaptation_rate)
+        super().__init__(input_size, dimensions, adaptation_rate, use_tqdm = use_tqdm)
         self.plus_factor = plus_factor
         self.minus_factor = minus_factor
 
@@ -624,6 +632,8 @@ class NodeSyncMap(LightSyncMap):
         
         self.history_repel = np.zeros((input_size, input_size))
         self.variable_tracker = VariableTracker(vars = input_size, max_length = max_track_length)
+
+        self.max_past_activate = max_past_activate
         
 
 
@@ -720,7 +730,7 @@ class NodeSyncMap(LightSyncMap):
         for idx in plus_idx:
             history_vplus = self.variable_tracker.read(idx)  # （T, N）
             history_plus_mask = np.matmul(history_vplus[..., np.newaxis], history_vplus[:, np.newaxis])  # (T, N, N)
-            history_plus_weight = history_plus_mask.astype(int) * np.linspace(0.001, 0, len(history_vplus)+1, endpoint=False)[1:, np.newaxis, np.newaxis]  # (T, N, N) 这个+1是为了把当前的vplus给考虑进去
+            history_plus_weight = history_plus_mask.astype(int) * np.linspace(self.max_past_activate, 0, len(history_vplus)+1, endpoint=False)[1:, np.newaxis, np.newaxis]  # (T, N, N) 这个+1是为了把当前的vplus给考虑进去
             # TODO: 开加！
             
             total_plus_mask += history_plus_mask.sum(axis=0).astype(bool)  # (N, N) debug1
