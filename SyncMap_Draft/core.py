@@ -748,8 +748,12 @@ class NodeSyncMap(LightSyncMap):
         # update_plus[~plus_mask] = 0
         # update_plus = update_plus.sum(axis=0)
         # ###########################################
-        update_plus = -all_coordinate_diff_sin_cos.copy() * total_plus_weight[..., np.newaxis]  # (N, N, D)
-        # TODO: 把history_plus_mask与history_plus_weight带入运算
+        # 不带距离的
+        # update_plus = -all_coordinate_diff_sin_cos.copy() * total_plus_weight[..., np.newaxis]  # (N, N, D)
+        update_plus = -all_coordinate_diff_sin_cos.copy() * total_plus_weight[..., np.newaxis] * (
+            1 + self.plus_exp_factor * self.exp_update(
+            all2all_distance.copy()[:, :, np.newaxis], self.attract_range)
+        )
         update_plus[~total_plus_mask] = 0
         update_plus = update_plus.sum(axis=0)
 
