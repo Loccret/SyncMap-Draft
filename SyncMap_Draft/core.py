@@ -566,7 +566,7 @@ class VariableTracker(object):
         # self.vars_tracker = {i: deque(maxlen=max_length) for i in range(vars)}
         self.vars = vars
         # self.temp_vec = np.array([False for _ in range(vars)])
-        self.vars_tracker = [deque(maxlen=max_length) for _ in range(vars)]
+        self.vars_tracker = [deque(maxlen=max_length+1) for _ in range(vars)]  # the last one is the current state, it will be removed when read
         self.last_vector = None
 
     def __repr__(self):
@@ -591,20 +591,22 @@ class VariableTracker(object):
         '''
         args:
             ele_idx(1,): int, the index of the element we need to read
+        return:
+            np.ndarray, shape = (len(activiated_idxs), self.vars), the old activated indexes
         '''
-        activiated_idxs = list(self.vars_tracker[ele_idx])[::-1]  # new -> old. The newer one should have larger attractive power. Consist of activated indexes
+        activiated_idxs = list(self.vars_tracker[ele_idx])[-2::-1]  # convert to new -> old. And remove the current state
         result = np.zeros((len(activiated_idxs), self.vars), dtype=bool)
         for row, idxs in enumerate(activiated_idxs):
             result[row, idxs] = True
         return result
 
 
-# %% ../nbs/00_core.ipynb 76
+# %% ../nbs/00_core.ipynb 80
 class NodeSyncMap(LightSyncMap):
     def __init__(self, input_size, dimensions, adaptation_rate, 
                 plus_factor = 1, minus_factor = 0.1, attract_range = 0.0001, 
                 repel_range = 1,plus_exp_factor = 0.2, minus_exp_factor = 1,
-                history_repel_factor = 1000, max_track_length = 3
+                history_repel_factor = 1000, max_track_length = 2
                 ):
         super().__init__(input_size, dimensions, adaptation_rate)
         self.plus_factor = plus_factor
@@ -701,7 +703,7 @@ class NodeSyncMap(LightSyncMap):
     def compute_update(self, syncmap_previous, vplus, vminus):
         # last_update_plus = None
         all2all_distance = self.calculate_pairwise_distances(syncmap_previous)  # (N, N)
-        all_coordinate_diff = syncmap_previous[np.newaxis, :, :] - syncmap_previous[:, np.newaxis, :]  # 这个方向代表了排斥
+        all_coordinate_diff = syncmap_previous[np.newaxis, :, :] - syncmap_previous[:, np.newaxis, :]  # 这个方向代表了排斥 (N, N, D)
         
         with np.errstate(divide='ignore', invalid='ignore'):
             all_coordinate_diff_sin_cos = np.nan_to_num(all_coordinate_diff / all2all_distance[:, :, np.newaxis] ** 1, nan=0)  # ** 2是为了引入距离关系， ** 1仅仅是方向向量 （N, N, D）
@@ -711,12 +713,36 @@ class NodeSyncMap(LightSyncMap):
 
         # distance weighted plus update
         plus_mask  = (vplus[:, np.newaxis] @ vplus[np.newaxis, :])  # 防止正向对负向产生影响
-        update_plus = -all_coordinate_diff_sin_cos.copy() * (
-            1 + self.plus_exp_factor * self.exp_update(
-            all2all_distance.copy()[:, :, np.newaxis], self.attract_range)
-        )  # 由于`all_coordinate_diff`表明的原始方向是排斥的，所以这里是负号
-        update_plus[~plus_mask] = 0
+        self.variable_tracker.write(vplus)
+        plus_idx = np.where(vplus)[0]
+        total_plus_mask = np.zeros((self.input_size, self.input_size), dtype=bool)  # (N, N)
+        total_plus_weight = np.zeros((self.input_size, self.input_size))
+        for idx in plus_idx:
+            history_vplus = self.variable_tracker.read(idx)  # （T, N）
+            history_plus_mask = np.matmul(history_vplus[..., np.newaxis], history_vplus[:, np.newaxis])  # (T, N, N)
+            history_plus_weight = history_plus_mask.astype(int) * np.linspace(0.001, 0, len(history_vplus)+1, endpoint=False)[1:, np.newaxis, np.newaxis]  # (T, N, N) 这个+1是为了把当前的vplus给考虑进去
+            # TODO: 开加！
+            
+            total_plus_mask += history_plus_mask.sum(axis=0).astype(bool)  # (N, N) debug1
+            total_plus_weight += history_plus_weight.sum(axis=0)  # (N, N)
+
+        # TODO
+        total_plus_mask += plus_mask # current plus
+        total_plus_weight += plus_mask.astype(int)  # current plus
+
+        # ################old version################
+        # update_plus = -all_coordinate_diff_sin_cos.copy() * (
+        #     1 + self.plus_exp_factor * self.exp_update(
+        #     all2all_distance.copy()[:, :, np.newaxis], self.attract_range)
+        # )  # 由于`all_coordinate_diff`表明的原始方向是排斥的，所以这里是负号  (N, N, D)
+        # update_plus[~plus_mask] = 0
+        # update_plus = update_plus.sum(axis=0)
+        # ###########################################
+        update_plus = -all_coordinate_diff_sin_cos.copy() * total_plus_weight[..., np.newaxis]  # (N, N, D)
+        # TODO: 把history_plus_mask与history_plus_weight带入运算
+        update_plus[~total_plus_mask] = 0
         update_plus = update_plus.sum(axis=0)
+
 
 
 
