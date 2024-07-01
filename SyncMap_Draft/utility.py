@@ -441,7 +441,7 @@ def labels2colors(labels):
     return [colorbar[label] for label in labels]
 
 # %% ../nbs/99_utility.ipynb 32
-def compute_nmi(variables, labels):
+def compute_nmi(variables, labels, eps=1, min_samples=2):
     '''
     Compute the normalized mutual information.
     args:
@@ -453,7 +453,7 @@ def compute_nmi(variables, labels):
     preds = []
     nmi = []
     for i in range(variables.shape[0]):
-        preds.append(DBSCAN(eps=1, min_samples=2).fit_predict(variables[i]))
+        preds.append(DBSCAN(eps=eps, min_samples=min_samples).fit_predict(variables[i]))
         nmi.append(normalized_mutual_info_score(labels, preds[i]))
 
     return np.array(nmi)

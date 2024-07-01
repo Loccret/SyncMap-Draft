@@ -62,23 +62,7 @@ class GraphProcessor:
             print("Number of nodes:", num_nodes)
             print("Number of edges:", len(self.G.edges))
 
-# %% ../nbs/01_GraphProcessor.ipynb 10
-# visualize the graph
-@patch
-def visualize_graph(self:GraphProcessor):
-    # Visualize the graph
-    if self.G is not None:
-        options = {
-            'node_size': 100,
-            'arrowstyle': '-|>',
-            'arrowsize': 12,
-        }
-        nx.draw_networkx(self.G, arrows=True, **options)
-        plt.show()
-    else:
-        print("Graph not yet loaded. Call read_graph() first.")
-
-# %% ../nbs/01_GraphProcessor.ipynb 12
+# %% ../nbs/01_GraphProcessor.ipynb 11
 # get the ground truth labels
 @patch
 def get_groundtruth_labels(self:GraphProcessor, dtype='numpy'):
@@ -92,7 +76,29 @@ def get_groundtruth_labels(self:GraphProcessor, dtype='numpy'):
         print("Graph not yet loaded. Call read_graph() first.")
         return None
 
-# %% ../nbs/01_GraphProcessor.ipynb 14
+
+# %% ../nbs/01_GraphProcessor.ipynb 13
+# visualize the graph
+@patch
+def visualize_graph(self:GraphProcessor, group_labels = None, graph_layout=0):
+    # Visualize the graph
+    colorbar = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'pink', 'brown', 'gray']
+    if self.G is not None:
+        layout_list = [nx.spring_layout, nx.circular_layout, nx.spectral_layout, nx.shell_layout, nx.kamada_kawai_layout]
+        pos = layout_list[graph_layout](self.G)
+
+        if group_labels is None:
+            node_color = 'skyblue'
+        else:
+            node_color = [colorbar[idx] for idx in (group_labels - group_labels.min())]
+
+        nx.draw_networkx_nodes(self.G, pos, node_size=300, node_color=node_color, alpha=0.7)
+        nx.draw_networkx_edges(self.G, pos, arrowstyle='-|>', arrowsize=10, edge_color='gray', alpha=0.5)
+        nx.draw_networkx_labels(self.G, pos, font_size=10, font_color='black')
+    else:
+        print("Graph not yet loaded. Call read_graph() first.")
+
+# %% ../nbs/01_GraphProcessor.ipynb 16
 # get the connection matrix A
 @patch
 def get_connection_matrix(self:GraphProcessor):
@@ -103,7 +109,7 @@ def get_connection_matrix(self:GraphProcessor):
         print("Graph not yet loaded. Call read_graph() first.")
         return None
 
-# %% ../nbs/01_GraphProcessor.ipynb 16
+# %% ../nbs/01_GraphProcessor.ipynb 18
 # Set graph from adjacency matrix
 @patch
 def set_graph_from_adjacency_matrix(self:GraphProcessor, A):
@@ -113,7 +119,7 @@ def set_graph_from_adjacency_matrix(self:GraphProcessor, A):
     self.labels = {node: i for i, node in enumerate(self.G.nodes)}
     self.labels_numpy = np.array([int(self.labels[node]) for node in self.G.nodes])
 
-# %% ../nbs/01_GraphProcessor.ipynb 18
+# %% ../nbs/01_GraphProcessor.ipynb 20
 # ccreate a random walk on the graph for generating trajectories(Syncmap data)
 @patch
 def random_walk_on_graph(self:GraphProcessor, connection_matrix=None, L=3000, reset_time=None):
@@ -164,7 +170,7 @@ def random_walk_on_graph(self:GraphProcessor, connection_matrix=None, L=3000, re
     return np.array(trajectory), np.array(one_hot_vectors)
 
 
-# %% ../nbs/01_GraphProcessor.ipynb 24
+# %% ../nbs/01_GraphProcessor.ipynb 26
 class WorkingMemProcessor:
     def __init__(self, state_memory, input_size=None, time_delay=0):
         self.state_memory = state_memory
@@ -206,7 +212,7 @@ class WorkingMemProcessor:
     def __repr__(self):
         return f"Working Memory Processor: state_memory={self.state_memory}, input_size={self.input_size}, time_delay={self.time_delay}"
 
-# %% ../nbs/01_GraphProcessor.ipynb 30
+# %% ../nbs/01_GraphProcessor.ipynb 32
 class Readout:
     def __init__(self, input_map=None, input_matrix=None, ground_truth=None):
         self.input_map = input_map
