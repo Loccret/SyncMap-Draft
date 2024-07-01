@@ -281,7 +281,7 @@ class SymmetricalSyncMap:
 
         # initialize the sync map
         np.random.seed(42)
-        self.syncmap = np.random.rand(self.input_size, self.dimensions) * self.space_scale
+        self.syncmap = np.random.rand(self.input_size, self.dimensions).astype(np.float32) * self.space_scale
         self.syncmap = ((self.syncmap - np.mean(self.syncmap, axis=0)) / (np.std(self.syncmap, axis=0) + 1e-12)) * self.space_scale
 
         self.syncmap_movmean_list = deque(maxlen=movmean_window)
@@ -302,7 +302,7 @@ class SymmetricalSyncMap:
 
     @property
     def log(self):
-        return np.asarray(self.fit_log)
+        return np.asarray(self.fit_log, dtype = np.float32)
 
     def input_sequential(self, input_seq, current_state=None, Verbose_tqdm=True):
         # start processing
@@ -314,14 +314,14 @@ class SymmetricalSyncMap:
         for i_state in verbose(range(len(input_seq))):
             state = input_seq[i_state]
             # current_state_idx = current_state[i_state] if current_state is not None else None
-            self.adapt_chunking(input_state_vec=state)
+            self.adapt_chunking(input_state_vec=state, current_state_idx = i_state)
             if i_state % self.movmean_interval == 0 or i_state == len(input_seq) - 1:
                 self.syncmap_movmean_list.append(self.syncmap.copy())
 
         self.syncmap_movmean = np.mean(np.asarray(self.syncmap_movmean_list), axis=0)
 
 
-    def adapt_chunking(self, input_state_vec):
+    def adapt_chunking(self, input_state_vec, current_state_idx):
 
         syncmap_previous = self.syncmap.copy()
 
@@ -367,7 +367,8 @@ class SymmetricalSyncMap:
         # leaking
         self.syncmap = self.leaking_rate * self.syncmap + (1 - self.leaking_rate) * syncmap_previous
 
-        self.fit_log.append(self.syncmap.copy())
+        if current_state_idx % 10 == 0:
+            self.fit_log.append(self.syncmap.copy())
         return self.syncmap
 
 
