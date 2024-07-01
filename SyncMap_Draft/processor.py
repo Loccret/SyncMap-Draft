@@ -82,9 +82,7 @@ def get_groundtruth_labels(self:GraphProcessor, dtype='numpy'):
 @patch
 def visualize_graph(self:GraphProcessor, group_labels = None, graph_layout=0):
     # Visualize the graph
-    colorbar = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 
-                'black', 'pink', 'brown', 'gray', 'cyan', 'magenta', 'olive', 
-                'lime', 'teal', 'indigo', 'maroon', 'navy', 'gold', 'orchid']
+
     if self.G is not None:
         layout_list = [nx.spring_layout, nx.circular_layout, nx.spectral_layout, nx.shell_layout, nx.kamada_kawai_layout]
         pos = layout_list[graph_layout](self.G)
@@ -92,6 +90,10 @@ def visualize_graph(self:GraphProcessor, group_labels = None, graph_layout=0):
         if group_labels is None:
             node_color = 'skyblue'
         else:
+            colorbar = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 
+                        'black', 'pink', 'brown', 'gray', 'cyan', 'magenta', 'olive', 
+                        'lime', 'teal', 'indigo', 'maroon', 'navy', 'gold', 'orchid']
+            
             node_color = [colorbar[idx] for idx in (group_labels - group_labels.min())]
 
         nx.draw_networkx_nodes(self.G, pos, node_size=300, node_color=node_color, alpha=0.7)
