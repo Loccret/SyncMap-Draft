@@ -455,7 +455,7 @@ class LightSyncMap:
 		self.input_size= input_size
 		#syncmap= np.zeros((input_size,dimensions))
 		np.random.seed(42)
-		self.syncmap= np.random.rand(input_size,dimensions)
+		self.syncmap= np.random.rand(input_size,dimensions).astype(np.float32)
 		self.adaptation_rate= adaptation_rate
 		self.delay_effect = 0.8
 		self.fit_log = []
@@ -465,7 +465,7 @@ class LightSyncMap:
 
 	@property  # 在class内部引用这个函数贼慢
 	def log(self):
-		return np.asarray(self.fit_log)
+		return np.asarray(self.fit_log, dtype = np.float32)
 
 	def maybe_tqdm(self, iterable, total=None, use_tqdm=True):
 		if use_tqdm:
@@ -477,7 +477,7 @@ class LightSyncMap:
 
 		for idx, state in self.maybe_tqdm(enumerate(input_sequence), total=len(input_sequence), use_tqdm=self.use_tqdm):
 			vplus, vminus = self.get_postive_and_negative_state(state)
-			new_snycmap = self.one_step_organize(vplus, vminus)
+			new_snycmap = self.one_step_organize(vplus, vminus, idx)
 
 			if new_snycmap is not None:
 				self.syncmap = new_snycmap[:]
@@ -524,7 +524,7 @@ class LightSyncMap:
 		return syncmap_arr / maximum # self.space_size*
 
 
-	def one_step_organize(self, vplus, vminus):
+	def one_step_organize(self, vplus, vminus, current_state_idx):
 		syncmap_previous = self.syncmap.copy()
 		center_plus  = self.get_center(vplus, syncmap_previous)
 		center_minus = self.get_center(vminus, syncmap_previous)
@@ -544,7 +544,8 @@ class LightSyncMap:
 
 		new_syncmap = self.update(update_plus, update_minus, syncmap_previous)
 		
-		self.fit_log.append(new_syncmap)
+		if current_state_idx % 10 == 0:
+			self.fit_log.append(new_syncmap)
 		return new_syncmap
 			
 	def cluster(self):
@@ -698,18 +699,6 @@ class NodeSyncMap(LightSyncMap):
     
         # self.history_repel = np.minimum(self.history_repel, 1000)
         # return self.history_repel[:,:,np.newaxis]/1000
-
-
-    # def similar_trajectory_update(self, ):
-    #     length_of_log = len(self.fit_log)
-    #     if length_of_log < 10_000:
-    #         return np.zeros((self.input_size, self.input_size)) < -1  # need false here
-    #     elif length_of_log % 10_000 == 0:
-    #         trajectory = np.asarray(self.fit_log[-10_000:])
-    #         self.similar_attract_idx = self.compute_wasserstein_distances(trajectory)
-    #         return self.similar_attract_idx<1
-    #     else:
-    #         return np.zeros((self.input_size, self.input_size)) < -1
         
     def compute_update(self, syncmap_previous, vplus, vminus):
         # last_update_plus = None
@@ -719,8 +708,6 @@ class NodeSyncMap(LightSyncMap):
         with np.errstate(divide='ignore', invalid='ignore'):
             all_coordinate_diff_sin_cos = np.nan_to_num(all_coordinate_diff / all2all_distance[:, :, np.newaxis] ** 1, nan=0)  # ** 2是为了引入距离关系， ** 1仅仅是方向向量 （N, N, D）
         # 在sum之前乘以系数可以为每个variable的排斥力加权； 
-
-
 
         # distance weighted plus update
         plus_mask  = (vplus[:, np.newaxis] @ vplus[np.newaxis, :])  # 防止正向对负向产生影响
@@ -771,56 +758,11 @@ class NodeSyncMap(LightSyncMap):
         )
         update_minus[~minus_mask] = 0  # ~minus_mask: 所有含有正向的variables update全部置零
         update_minus = update_minus.sum(axis=0)
-
-
-        # # last activity update
-        # if (self.last_activity is not None) and np.all(self.last_activity != vplus):
-        #     last_plus_mask = (self.last_activity[:, np.newaxis] @ self.last_activity[np.newaxis, :])
-        #     last_update_plus = -all_coordinate_diff_sin_cos.copy() * (
-        #         self.last_activity_factor  + self.plus_exp_factor * self.exp_update(
-        #         all2all_distance.copy()[:, :, np.newaxis], self.attract_range))
-        #     last_update_plus[~last_plus_mask] = 0
-        #     last_update_plus = last_update_plus.sum(axis=0)
-
-        #     update_plus += last_update_plus
-
-
-
-        # update_minus = all_coordinate_diff_sin_cos.copy() * self.exp_update(
-        #     all2all_distance.copy()[:, :, np.newaxis], self.repel_range) * (1+ self.repel_constant_update(plus_mask, minus_mask))
-
-        # self.exp_update: distance weighted update
-        # self.repel_constant_update: continuous repel update
-
-        
-        
-        # TODO: 吸引累积叠加，如果负向连成一条线怎么避免五星连珠效应？
-
-
-        # similar_value_mask = np.broadcast_to(self.similar_trajectory_update()[..., np.newaxis], (self.input_size, self.input_size, self.dimensions))  #
-
-        # update_similar_plus = -all_coordinate_diff_sin_cos.copy() # * self.exp_update(all2all_distance.copy()[:, :, np.newaxis], self.attract_range)
-
-
-
-        
-        # update_similar_plus[~similar_value_mask] = 0
-
-
-        # mask = np.broadcast_to((all2all_distance>0.5 & vminus[:, np.newaxis])[..., np.newaxis], (all2all_distance[0], all2all_distance[1], self.dimensions) ) # N, N, D
-        # all_coordinate_diff_sin_cos[mask] = 0
-
-        # all_coordinate_diff_sin_cos = all_coordinate_diff_sin_cos.sum(axis=0)
-        
-        
-        # update_similar_plus = update_similar_plus.sum(axis=0)
-        
-        # update_plus += self.trajectory_attract * update_similar_plus
         return self.plus_factor * update_plus, self.minus_factor * update_minus
 
 
 
-    def one_step_organize(self, vplus, vminus):
+    def one_step_organize(self, vplus, vminus, current_state_idx):
         syncmap_previous = self.syncmap.copy()
         syncmap_previous += np.random.normal(-1e-5, 1e-5, syncmap_previous.shape)
         center_plus  = self.get_center(vplus, syncmap_previous)
@@ -840,7 +782,7 @@ class NodeSyncMap(LightSyncMap):
         # new_syncmap = self.max_move_distance_test(syncmap_previous, new_syncmap, vplus, vminus, center_plus, center_minus, dist_plus, dist_minus)
 
         # new_syncmap = new_syncmap / np.abs(new_syncmap).max()
-
-        self.fit_log.append(new_syncmap)
+        if current_state_idx % 10 == 0:
+            self.fit_log.append(new_syncmap)
         return new_syncmap
 
